@@ -1,0 +1,16 @@
+{
+  "name": "model-budgetting-notes-budget-notes",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/model/budgetting/notes/budget-notes/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/model/budgetting/notes/budget-notes/**/*.ts"]
+      }
+    }
+  },
+  "tags": []
+}
