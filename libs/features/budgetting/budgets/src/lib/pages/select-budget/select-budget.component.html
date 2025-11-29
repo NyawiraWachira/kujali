@@ -1,12 +1,16 @@
 <app-page>
   <div>
     <kujali-finance-toolbar>
-      <kujali-finance-search-header-card header (toogleFilterEvent)='toogleFilter($event)'
-        (searchTableEvent)='applyFilter($event)' [tableData]="[]">
+      <kujali-finance-search-header-card
+        header
+        (toogleFilterEvent)="toogleFilter($event)"
+        (searchTableEvent)="applyFilter($event)"
+        [tableData]="[]"
+      >
         <div add-new>
           <button mat-flat-button (click)="openDialog(false)" class="add-new">
             <i class="bi bi-plus-circle-fill"></i>
-            {{'HEADER-ADD-NEW' | transloco}}
+            {{ 'HEADER-ADD-NEW' | transloco }}
           </button>
         </div>
       </kujali-finance-search-header-card>
@@ -18,7 +22,7 @@
     </div>
 
     <div class="table-container">
-      <app-budget-table [budgets$]="allBudgets$"></app-budget-table>
+      <app-budget-table [budgets$]="allBudgets()"></app-budget-table>
     </div>
   </div>
 </app-page>
