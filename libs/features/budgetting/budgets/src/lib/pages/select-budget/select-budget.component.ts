@@ -1,8 +1,13 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+// import { Component, OnInit, ViewChild } from '@angular/core';
+
+import { Component, OnInit, ViewChild, inject, signal, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 
 import { cloneDeep as ___cloneDeep, flatMap as __flatMap } from 'lodash';
-import { Observable, combineLatest, map, tap } from 'rxjs';
+// import { Observable, combineLatest, map, tap } from 'rxjs';
+
+import { tap } from 'rxjs';
 
 import { Logger } from '@iote/bricks-angular';
 
@@ -23,33 +28,76 @@ import { CreateBudgetModalComponent } from '../../components/create-budget-modal
 export class SelectBudgetPageComponent implements OnInit
 {
   /** Overview which contains all budgets of an organisation */
-  overview$!: Observable<OrgBudgetsOverview>;
-  sharedBudgets$: Observable<any[]>;
 
-  showFilter = false;
+  // overview$!: Observable<OrgBudgetsOverview>;
+  // sharedBudgets$: Observable<any[]>;
 
-  // budgetsLoaded: boolean = false;
+  // showFilter = false;
 
-  allBudgets$: Observable<{overview: BudgetRecord[], budgets: any[]}>;
+  // // budgetsLoaded: boolean = false;
 
-  constructor(private _orgBudgets$$: OrgBudgetsStore,
-              private _budgets$$: BudgetsStore,
-              private _dialog: MatDialog,
-              private _logger: Logger) 
-  { }
+  // allBudgets$: Observable<{overview: BudgetRecord[], budgets: any[]}>;
 
-  ngOnInit() {
-    this.overview$ = this._orgBudgets$$.get();
-    this.sharedBudgets$ = this._budgets$$.get();
 
-    this.allBudgets$ = combineLatest([this.overview$, this._budgets$$.get()])
-                      .pipe(map(([overview, budgets]) => {return {overview: __flatMap(overview), budgets: __flatMap(budgets)}}),
-                            map((overview) => {
-                              const trBudgets = overview.budgets.map((budget: any) => {budget['endYear'] = budget.startYear + budget.duration - 1; return budget;})
-                              // this.budgetsLoaded = true;
-                              return {overview: overview.overview, budgets: trBudgets}
-                            }));
-  }
+
+overview = toSignal(this._orgBudgets$$.get(), { initialValue: {} as OrgBudgetsOverview });
+sharedBudgets = toSignal(this._budgets$$.get(), { initialValue: [] });
+showFilter = false;
+
+allBudgets = computed(() => {
+  const overview = this.overview();
+  const budgets = this.sharedBudgets();
+  
+  const flatOverview = __flatMap(overview);
+  const flatBudgets = __flatMap(budgets);
+  
+  const trBudgets = flatBudgets.map((budget: any) => {
+    budget['endYear'] = budget.startYear + budget.duration - 1;
+    return budget;
+  });
+  
+  return { overview: flatOverview, budgets: trBudgets };
+});
+
+
+
+
+
+  // constructor(private _orgBudgets$$: OrgBudgetsStore,
+  //             private _budgets$$: BudgetsStore,
+  //             private _dialog: MatDialog,
+  //             private _logger: Logger) 
+  // { }
+
+  
+  private _orgBudgets$$ = inject(OrgBudgetsStore);
+  private _budgets$$ = inject(BudgetsStore);
+  private _dialog = inject(MatDialog);
+  private _logger = inject(Logger);
+  
+  
+  
+  // ngOnInit() {
+  //   this.overview$ = this._orgBudgets$$.get();
+  //   this.sharedBudgets$ = this._budgets$$.get();
+
+  //   this.allBudgets$ = combineLatest([this.overview$, this._budgets$$.get()])
+  //                     .pipe(map(([overview, budgets]) => {return {overview: __flatMap(overview), budgets: __flatMap(budgets)}}),
+  //                           map((overview) => {
+  //                             const trBudgets = overview.budgets.map((budget: any) => {budget['endYear'] = budget.startYear + budget.duration - 1; return budget;})
+  //                             // this.budgetsLoaded = true;
+  //                             return {overview: overview.overview, budgets: trBudgets}
+  //                           }));
+  // }
+
+
+
+
+
+ngOnInit() {
+
+}
+
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
