@@ -1,12 +1,11 @@
-import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+
+import { Component, EventEmitter, Input, Output, ViewChild, inject, effect } from '@angular/core';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSort } from '@angular/material/sort';
 import { Router } from '@angular/router';
 
-import { SubSink } from 'subsink';
-import { Observable, tap } from 'rxjs';
 
 import { Budget, BudgetRecord } from '@app/model/finance/planning/budgets';
 
@@ -22,9 +21,9 @@ import { ChildBudgetsModalComponent } from '../../modals/child-budgets-modal/chi
 
 export class BudgetTableComponent {
 
-  private _sbS = new SubSink();
+  // private _sbS = new SubSink();
 
-  @Input() budgets$: Observable<{overview: BudgetRecord[], budgets: any[]}>;
+  @Input() budgets$: {overview: BudgetRecord[], budgets: any[]};
   @Input() canPromote = false;
 
   @Output() doPromote: EventEmitter<void> = new EventEmitter();
@@ -38,16 +37,20 @@ export class BudgetTableComponent {
 
   overviewBudgets: BudgetRecord[] = [];
 
-  constructor(private _router$$: Router,
-              private _dialog: MatDialog,
-  ) { }
+  private _router$$ = inject(Router);
+  private _dialog = inject(MatDialog);
 
-  ngOnInit(): void {
-    this._sbS.sink = this.budgets$.pipe(tap((o) => {
-      this.overviewBudgets = o.overview;
-      this.dataSource.data = o.budgets;
-    })).subscribe();
-  }
+  constructor() {
+  this._router$$ = inject(Router);
+  this._dialog = inject(MatDialog);
+  
+  effect(() => {
+    if (this.budgets$) {
+      this.overviewBudgets = this.budgets$.overview;
+      this.dataSource.data = this.budgets$.budgets;
+    }
+  });
+}
 
   /** 
  * Checks whether the user has access to a certain feature.
